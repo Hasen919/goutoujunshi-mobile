@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b1726" />
+    <meta name="description" content="一款不上传聊天内容、可添加到手机主屏幕的私人高情商回复助手。" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="狗头军师" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="./icon.svg" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%230b1726'/%3E%3Cpath d='M18 19h28v20H32l-9 8v-8h-5z' fill='%237f9cff'/%3E%3Ccircle cx='26' cy='29' r='2.3' fill='white'/%3E%3Ccircle cx='38' cy='29' r='2.3' fill='white'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="./styles.css" />
+    <title>狗头军师 · 私人版</title>
+  </head>
+  <body>
+    <div class="ambient" aria-hidden="true"></div>
+    <header class="topbar">
+      <a class="brand" href="#compose" aria-label="返回回复编辑区">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" role="img"><path d="M5 7.5h22v15H16l-7 5v-5H5z"/><circle cx="12" cy="15" r="1.5"/><circle cx="20" cy="15" r="1.5"/></svg>
+        </span>
+        <span><strong>狗头军师</strong><small>私人离线版</small></span>
+      </a>
+      <button class="privacy-pill" id="privacyButton" type="button" aria-expanded="false" aria-controls="privacyPanel">
+        <span aria-hidden="true">●</span> 内容不上传
+      </button>
+    </header>
+
+    <main id="compose" class="workspace">
+      <section class="composer" aria-labelledby="composerTitle">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">现在要回什么</p>
+            <h1 id="composerTitle">把原话放进来</h1>
+          </div>
+          <span class="step-mark" aria-label="第一步">01</span>
+        </div>
+
+        <label class="field-label" for="incoming">对方说</label>
+        <textarea id="incoming" rows="5" maxlength="500" placeholder="例如：最近有点忙，等过段时间再说吧"></textarea>
+        <div class="field-meta"><span>只在当前页面处理</span><span id="charCount">0 / 500</span></div>
+
+        <div class="field-grid">
+          <label>
+            <span class="field-label">你们的关系</span>
+            <select id="relation">
+              <option value="刚认识">刚认识</option>
+              <option value="暧昧中" selected>暧昧中</option>
+              <option value="恋爱中">恋爱中</option>
+              <option value="闹矛盾">闹矛盾</option>
+              <option value="分开后">分开后</option>
+            </select>
+          </label>
+          <label>
+            <span class="field-label">这次想要</span>
+            <select id="goal">
+              <option value="推进">自然推进</option>
+              <option value="理解">先理解对方</option>
+              <option value="修复">修复关系</option>
+              <option value="确认">确认态度</option>
+              <option value="退出">体面退出</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="field-label" for="context">补一句背景 <span>可选</span></label>
+        <input id="context" maxlength="180" placeholder="例如：上周约过一次，她没有给具体时间" />
+
+        <fieldset class="tone-field">
+          <legend class="field-label">回复分寸</legend>
+          <div class="tone-options">
+            <label><input type="radio" name="tone" value="稳妥" checked /><span>稳妥</span></label>
+            <label><input type="radio" name="tone" value="会撩" /><span>会撩</span></label>
+            <label><input type="radio" name="tone" value="有边界" /><span>有边界</span></label>
+          </div>
+        </fieldset>
+
+        <button class="primary-action" id="generateButton" type="button">
+          <span>给我一条能直接发的</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
+        </button>
+        <p class="safety-note">明确拒绝、不适或危险信号出现时，军师会优先建议停止推进。</p>
+      </section>
+
+      <section class="answer-panel" aria-labelledby="answerTitle" aria-live="polite">
+        <div class="answer-topline">
+          <div>
+            <p class="eyebrow">首选回复 · 离线建议</p>
+            <h2 id="answerTitle">先温柔，再清楚</h2>
+          </div>
+          <span id="signalBadge" class="signal-badge">等待原话</span>
+        </div>
+
+        <div class="draft-card" id="draftCard">
+          <blockquote id="draftText">把对方的原话填好后，我会先给你一条可以直接复制的回复。</blockquote>
+          <div class="draft-actions">
+            <button id="copyButton" class="secondary-action" type="button" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
+              复制回复
+            </button>
+            <button id="saveButton" class="text-action" type="button" disabled>保存到本机</button>
+          </div>
+        </div>
+
+        <div class="signal-rail" aria-label="回复判断依据">
+          <article>
+            <span class="rail-dot fact" aria-hidden="true"></span>
+            <p class="rail-label">看到的事实</p>
+            <p id="factText">目前还没有对方的原话。</p>
+          </article>
+          <article>
+            <span class="rail-dot maybe" aria-hidden="true"></span>
+            <p class="rail-label">暂不脑补</p>
+            <p id="unknownText">不凭一句话猜测对方内心。</p>
+          </article>
+          <article>
+            <span class="rail-dot next" aria-hidden="true"></span>
+            <p class="rail-label">下一步</p>
+            <p id="nextText">发出后观察对方是否给出具体、可兑现的回应。</p>
+          </article>
+        </div>
+
+        <div class="alternate" id="alternateBox" hidden>
+          <p class="field-label">另一个版本</p>
+          <p id="alternateText"></p>
+          <button id="useAlternate" class="text-action" type="button">换成这一条</button>
+        </div>
+
+        <div class="saved-panel" id="savedPanel" hidden>
+          <div class="saved-heading">
+            <p class="field-label">本机保存的回复</p>
+            <button id="closeSaved" class="text-action" type="button">收起</button>
+          </div>
+          <div id="savedList"></div>
+        </div>
+      </section>
+    </main>
+
+    <section id="privacyPanel" class="privacy-panel" hidden>
+      <div>
+        <p class="eyebrow">隐私边界</p>
+        <h2>聊天留在你的设备上</h2>
+      </div>
+      <ul>
+        <li>回复由浏览器本地规则生成，不把原话传到服务器。</li>
+        <li>它能处理常见情境，但不能像完整 AI Skill 一样理解复杂关系；发送前请确认符合你的真实意思。</li>
+        <li>不会自动保存输入，也没有账号、广告或访问统计。</li>
+        <li>你主动保存的草稿只存在当前浏览器，可随时清空。</li>
+      </ul>
+      <button id="clearSaved" class="danger-action" type="button">清空本机保存</button>
+    </section>
+
+    <aside class="install-tip" id="installTip" hidden>
+      <span aria-hidden="true">＋</span>
+      <p><strong>装到手机桌面</strong><br />Safari 点“分享”，再选“添加到主屏幕”。</p>
+      <button id="dismissInstall" type="button" aria-label="关闭安装提示">×</button>
+    </aside>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <footer>
+      <p>独立私人版。建议仅供参考，不替代心理、医疗或法律专业意见。</p>
+      <button id="showSaved" type="button">查看本机保存的回复</button>
+      <button id="showInstall" type="button">如何添加到主屏幕</button>
+    </footer>
+
+    <script src="./app.js" defer></script>
+  </body>
+</html>
