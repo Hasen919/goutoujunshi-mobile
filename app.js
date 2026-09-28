@@ -24,14 +24,56 @@ const elements = {
   privacyButton: $("#privacyButton"),
   privacyPanel: $("#privacyPanel"),
   clearSaved: $("#clearSaved"),
+  clearAccessCodePrivacy: $("#clearAccessCodePrivacy"),
+  clearAccessCode: $("#clearAccessCode"),
+  accessCode: $("#accessCode"),
+  accessBox: $("#accessBox"),
+  modelNote: $("#modelNote"),
+  processingNote: $("#processingNote"),
+  answerSource: $("#answerSource"),
+  generateLabel: $("#generateLabel"),
+  requestStatus: $("#requestStatus"),
   installTip: $("#installTip"),
   showInstall: $("#showInstall"),
   dismissInstall: $("#dismissInstall"),
   toast: $("#toast"),
+  brandSubtitle: $("#brandSubtitle"),
+  connectionBanner: $("#connectionBanner"),
 };
 
 let currentDraft = "";
 let currentAlternate = "";
+let activeRequest = 0;
+const apiUrl = window.GOUTOUJUNSHI_CONFIG?.apiUrl?.trim() || "";
+const availableProviders = window.GOUTOUJUNSHI_CONFIG?.availableProviders || [];
+const providerNames = { deepseek: "DeepSeek", openai: "ChatGPT", offline: "离线应急" };
+elements.brandSubtitle.textContent = availableProviders.length ? "AI / 离线，随时切换" : "离线可用 · AI 接入中";
+elements.connectionBanner.hidden = availableProviders.length > 0;
+
+function provider() {
+  return document.querySelector('input[name="provider"]:checked')?.value || "offline";
+}
+
+function setStatus(message, error = false) {
+  elements.requestStatus.textContent = message;
+  elements.requestStatus.classList.toggle("is-error", error);
+}
+
+function updateProviderUi(resetStatus = true) {
+  const selected = provider();
+  const online = selected !== "offline";
+  const ready = online && !!apiUrl && availableProviders.includes(selected);
+  elements.accessBox.hidden = !ready;
+  elements.processingNote.textContent = ready ? "联机会发送给所选 AI 服务" : "当前只在本机处理";
+  elements.modelNote.textContent = online
+    ? ready ? `已选 ${providerNames[selected]} · 内容会发送到该服务处理` : `${providerNames[selected]} 尚未接通；目前可用离线应急。`
+    : "离线建议不调用 AI，适合没网络时应急。";
+  elements.generateLabel.textContent = online ? ready ? `用 ${providerNames[selected]} 生成回复` : `${providerNames[selected]} 待接通` : "给我一条能直接发的";
+  elements.generate.disabled = online && !ready;
+  if (!currentDraft) elements.answerSource.textContent = `首选回复 · ${online ? providerNames[selected] : "离线建议"}`;
+  if (resetStatus) setStatus("");
+  try { localStorage.setItem("goutoujunshi.provider", selected); } catch {}
+}
 
 const categoryRules = [
   { id: "stop", pattern: /别(再)?联系|不(要|想)(再)?联系|不想发展|没感觉|不合适|到此为止|别来找我|请你停止/ },
@@ -238,9 +280,10 @@ function renderSaved() {
   }
 }
 
-function render(result) {
+function render(result, source) {
   currentDraft = result.draft;
   currentAlternate = result.alternate;
+  elements.answerSource.textContent = `首选回复 · ${source}`;
   elements.draft.textContent = result.draft;
   elements.alternate.textContent = result.alternate;
   elements.fact.textContent = result.fact;
@@ -254,7 +297,7 @@ function render(result) {
   if (window.innerWidth <= 820) elements.draft.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
-function generate(inputOverride) {
+async function generate(inputOverride) {
   const incoming = (inputOverride?.incoming ?? elements.incoming.value).trim();
   if (!incoming) {
     elements.incoming.focus();
@@ -268,6 +311,10 @@ function generate(inputOverride) {
     tone: inputOverride?.tone ?? tone(),
     context: inputOverride?.context ?? elements.context.value.trim(),
   };
+  if (incoming.length > 500 || input.context.length > 180) {
+    setStatus("原话或背景太长，请缩短后重试。", true);
+    return null;
+  }
   if (inputOverride) {
     elements.incoming.value = input.incoming;
     elements.relation.value = input.relation;
@@ -276,9 +323,66 @@ function generate(inputOverride) {
     if (radio) radio.checked = true;
     elements.context.value = input.context || "";
   }
-  const result = resultFor(input);
-  render(result);
-  return { reply: result.draft, signal: result.badge, next: result.next };
+  const selectedProvider = provider();
+  if (selectedProvider === "offline") {
+    const result = resultFor(input);
+    render(result, "离线建议");
+    setStatus("已用本机规则生成；复杂情况请自行核对。");
+    return { reply: result.draft, signal: result.badge, next: result.next };
+  }
+  if (!apiUrl || !availableProviders.includes(selectedProvider)) {
+    setStatus(`${providerNames[selectedProvider]} 尚未接通。当前只能使用“离线应急”。`, true);
+    return null;
+  }
+  const accessCode = elements.accessCode.value.trim();
+  if (!accessCode) {
+    elements.accessCode.focus();
+    setStatus("先填写私人访问码，之后这台手机会记住。", true);
+    return null;
+  }
+  const requestId = ++activeRequest;
+  elements.generate.disabled = true;
+  elements.generateLabel.textContent = `${providerNames[selectedProvider]} 正在思考…`;
+  setStatus("正在结合原话生成，通常需要几秒钟。");
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 40000);
+  try {
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      mode: "cors",
+      credentials: "omit",
+      cache: "no-store",
+      headers: { "Content-Type": "application/json", "X-App-Access-Code": accessCode },
+      body: JSON.stringify({ ...input, provider: selectedProvider }),
+      signal: controller.signal,
+    });
+    const data = await response.json().catch(() => ({}));
+    if (requestId !== activeRequest) return null;
+    if (!response.ok) {
+      const messages = {
+        invalid_access_code: "访问码不正确，请核对后再试。",
+        provider_not_configured: `${providerNames[selectedProvider]} 尚未配置 API 密钥。`,
+        server_not_configured: "私人接口尚未配置完成。",
+        provider_unavailable: "AI 服务暂时无法生成，请稍后重试，或切换另一模型。",
+      };
+      setStatus(messages[data.error] || "联机请求失败，请稍后重试。", true);
+      return null;
+    }
+    if (!data.result?.draft || !data.result?.fact) throw new Error("bad_response");
+    try { localStorage.setItem("goutoujunshi.accessCode", accessCode); } catch {}
+    render(data.result, providerNames[selectedProvider]);
+    setStatus(`已由 ${providerNames[selectedProvider]} 生成。发送前请确认符合你的真实意思。`);
+    return { reply: data.result.draft, signal: data.result.badge, next: data.result.next };
+  } catch (error) {
+    if (requestId === activeRequest) setStatus(error.name === "AbortError" ? "等待超时，请重试或切换模型。" : "网络或接口异常，请检查连接后重试。", true);
+    return null;
+  } finally {
+    window.clearTimeout(timeout);
+    if (requestId === activeRequest) {
+      elements.generate.disabled = false;
+      updateProviderUi(false);
+    }
+  }
 }
 
 async function copyText(text) {
@@ -298,6 +402,20 @@ elements.incoming.addEventListener("input", () => {
   elements.charCount.textContent = `${elements.incoming.value.length} / 500`;
 });
 elements.generate.addEventListener("click", () => generate());
+for (const radio of document.querySelectorAll('input[name="provider"]')) {
+  radio.addEventListener("change", () => {
+    activeRequest += 1;
+    elements.generate.disabled = false;
+    updateProviderUi();
+  });
+}
+function clearAccessCode() {
+  elements.accessCode.value = "";
+  try { localStorage.removeItem("goutoujunshi.accessCode"); } catch {}
+  showToast("本机访问码已清除");
+}
+elements.clearAccessCode.addEventListener("click", clearAccessCode);
+elements.clearAccessCodePrivacy.addEventListener("click", clearAccessCode);
 elements.copy.addEventListener("click", async () => {
   await copyText(currentDraft);
   showToast("回复已复制");
@@ -341,6 +459,15 @@ if (isIos && !isStandalone && !sessionStorage.getItem("goutoujunshi.installDismi
   window.setTimeout(() => { elements.installTip.hidden = false; }, 1200);
 }
 elements.dismissInstall.addEventListener("click", () => sessionStorage.setItem("goutoujunshi.installDismissed", "1"));
+
+try {
+  elements.accessCode.value = localStorage.getItem("goutoujunshi.accessCode") || "";
+  const savedProvider = localStorage.getItem("goutoujunshi.provider");
+  const defaultProvider = availableProviders.includes(savedProvider) ? savedProvider : availableProviders[0] || "offline";
+  const radio = document.querySelector(`input[name="provider"][value="${defaultProvider}"]`);
+  if (radio) radio.checked = true;
+} catch {}
+updateProviderUi();
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}));

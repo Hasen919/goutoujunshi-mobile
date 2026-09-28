@@ -134,6 +134,7 @@ h1, h2 { margin: 0; font-family: var(--font-display); font-weight: 700; letter-s
 h1 { font-size: clamp(2rem, 5vw, 3.45rem); line-height: 1.14; }
 h2 { font-size: clamp(1.55rem, 3vw, 2.25rem); line-height: 1.2; }
 .step-mark { color: rgba(127, 156, 255, 0.48); font-family: ui-monospace, monospace; font-size: 0.9rem; }
+.connection-banner { margin: -10px 0 18px; padding: 10px 13px; border: 1px solid rgba(125, 226, 236, .22); border-radius: 12px; background: rgba(125, 226, 236, .06); color: #c5dce5; font-size: .84rem; line-height: 1.5; }
 
 .field-label {
   display: block;
@@ -177,6 +178,14 @@ textarea:focus, input:focus, select:focus { border-color: rgba(127, 156, 255, 0.
 }
 .tone-options input:checked + span { color: white; border-color: var(--blue); background: rgba(127, 156, 255, 0.17); box-shadow: inset 0 0 0 1px rgba(127, 156, 255, 0.18); }
 .tone-options input:focus-visible + span { outline: 3px solid rgba(125, 226, 236, 0.72); outline-offset: 3px; }
+.provider-field { margin-top: 4px; }
+.provider-options span { min-height: 52px; font-weight: 700; }
+.model-note { margin: 7px 2px 0; color: var(--muted); font-size: .78rem; line-height: 1.5; }
+.access-box { margin-top: 10px; padding: 0 14px 14px; border: 1px solid var(--line); border-radius: 14px; background: rgba(4, 12, 21, .32); }
+.access-box .field-label { margin-top: 12px; }
+.access-row { display: flex; align-items: center; gap: 10px; }
+.access-row input { min-width: 0; }
+.access-row button { flex: none; }
 
 .primary-action {
   width: 100%;
@@ -196,7 +205,10 @@ textarea:focus, input:focus, select:focus { border-color: rgba(127, 156, 255, 0.
 }
 .primary-action:hover { transform: translateY(-2px); box-shadow: 0 16px 34px rgba(77, 109, 255, 0.32); }
 .primary-action:active { transform: translateY(0); }
+.primary-action:disabled { opacity: .62; cursor: wait; transform: none; }
 .primary-action svg { width: 23px; fill: none; stroke: currentColor; stroke-width: 2; }
+.request-status { min-height: 1.2em; margin: 10px 3px 0; color: var(--cyan); font-size: .82rem; }
+.request-status.is-error { color: var(--danger); }
 .safety-note { margin: 12px 4px 0; color: #75879d; font-size: 0.78rem; }
 
 .signal-badge { border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; color: var(--muted); font-size: 0.74rem; white-space: nowrap; }
@@ -259,6 +271,7 @@ blockquote { position: relative; margin: 0; max-width: 32ch; color: #f9fbff; fon
 .privacy-panel h2 { font-size: 1.45rem; }
 .privacy-panel ul { color: var(--muted); padding-left: 20px; }
 .danger-action { color: var(--danger); padding: 8px 0; }
+.privacy-panel .danger-action + .danger-action { margin-left: 20px; }
 
 .install-tip {
   position: fixed;

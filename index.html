@@ -4,14 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#0b1726" />
-    <meta name="description" content="一款不上传聊天内容、可添加到手机主屏幕的私人高情商回复助手。" />
+    <meta name="description" content="可添加到手机主屏幕的私人回复助手，支持离线应急与 AI 模型切换。" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="狗头军师" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./icon.svg" />
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%230b1726'/%3E%3Cpath d='M18 19h28v20H32l-9 8v-8h-5z' fill='%237f9cff'/%3E%3Ccircle cx='26' cy='29' r='2.3' fill='white'/%3E%3Ccircle cx='38' cy='29' r='2.3' fill='white'/%3E%3C/svg%3E" />
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=7" />
     <title>狗头军师 · 私人版</title>
   </head>
   <body>
@@ -21,10 +21,10 @@
         <span class="brand-mark" aria-hidden="true">
           <svg viewBox="0 0 32 32" role="img"><path d="M5 7.5h22v15H16l-7 5v-5H5z"/><circle cx="12" cy="15" r="1.5"/><circle cx="20" cy="15" r="1.5"/></svg>
         </span>
-        <span><strong>狗头军师</strong><small>私人离线版</small></span>
+        <span><strong>狗头军师</strong><small id="brandSubtitle">私人回复助手</small></span>
       </a>
       <button class="privacy-pill" id="privacyButton" type="button" aria-expanded="false" aria-controls="privacyPanel">
-        <span aria-hidden="true">●</span> 内容不上传
+        <span aria-hidden="true">●</span> 隐私说明
       </button>
     </header>
 
@@ -37,10 +37,11 @@
           </div>
           <span class="step-mark" aria-label="第一步">01</span>
         </div>
+        <p class="connection-banner" id="connectionBanner">离线应急可用；AI 联机正在接入。这里不要填写 API 密钥。</p>
 
         <label class="field-label" for="incoming">对方说</label>
         <textarea id="incoming" rows="5" maxlength="500" placeholder="例如：最近有点忙，等过段时间再说吧"></textarea>
-        <div class="field-meta"><span>只在当前页面处理</span><span id="charCount">0 / 500</span></div>
+        <div class="field-meta"><span id="processingNote">离线模式只在本机处理</span><span id="charCount">0 / 500</span></div>
 
         <div class="field-grid">
           <label>
@@ -77,17 +78,37 @@
           </div>
         </fieldset>
 
+        <fieldset class="tone-field provider-field">
+          <legend class="field-label">使用哪个军师</legend>
+          <div class="tone-options provider-options">
+            <label><input type="radio" name="provider" value="deepseek" /><span>DeepSeek</span></label>
+            <label><input type="radio" name="provider" value="openai" /><span>ChatGPT</span></label>
+            <label><input type="radio" name="provider" value="offline" checked /><span>离线应急</span></label>
+          </div>
+          <p class="model-note" id="modelNote">离线建议不调用 AI，适合没网络时应急。</p>
+        </fieldset>
+
+        <div class="access-box" id="accessBox" hidden>
+          <label class="field-label" for="accessCode">首次使用联机模式：填写私人访问码</label>
+          <div class="access-row">
+            <input id="accessCode" type="password" autocomplete="off" spellcheck="false" placeholder="访问码只保存在本机，不是 API 密钥" />
+            <button id="clearAccessCode" class="text-action" type="button">清除</button>
+          </div>
+          <p class="model-note">无需登录账号。发送联机请求时，原话和背景会传给所选 AI 服务处理。</p>
+        </div>
+
         <button class="primary-action" id="generateButton" type="button">
-          <span>给我一条能直接发的</span>
+          <span id="generateLabel">给我一条能直接发的</span>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
         </button>
+        <p class="request-status" id="requestStatus" role="status" aria-live="polite"></p>
         <p class="safety-note">明确拒绝、不适或危险信号出现时，军师会优先建议停止推进。</p>
       </section>
 
       <section class="answer-panel" aria-labelledby="answerTitle" aria-live="polite">
         <div class="answer-topline">
           <div>
-            <p class="eyebrow">首选回复 · 离线建议</p>
+            <p class="eyebrow" id="answerSource">首选回复 · 离线建议</p>
             <h2 id="answerTitle">先温柔，再清楚</h2>
           </div>
           <span id="signalBadge" class="signal-badge">等待原话</span>
@@ -141,15 +162,16 @@
     <section id="privacyPanel" class="privacy-panel" hidden>
       <div>
         <p class="eyebrow">隐私边界</p>
-        <h2>聊天留在你的设备上</h2>
+        <h2>你选择数据怎么处理</h2>
       </div>
       <ul>
-        <li>回复由浏览器本地规则生成，不把原话传到服务器。</li>
-        <li>它能处理常见情境，但不能像完整 AI Skill 一样理解复杂关系；发送前请确认符合你的真实意思。</li>
-        <li>不会自动保存输入，也没有账号、广告或访问统计。</li>
-        <li>你主动保存的草稿只存在当前浏览器，可随时清空。</li>
+        <li>离线应急模式只用本机规则，不发送原话。</li>
+        <li>选 DeepSeek 或 ChatGPT 时，原话、关系、目标、语气和补充背景会经私人接口发送给所选 AI 服务；请先隐去姓名、电话等敏感信息。</li>
+        <li>网页无需登录。私人访问码保存在当前浏览器，供联机请求使用；API 密钥只应放在服务端。</li>
+        <li>输入不会自动保存；你主动保存的草稿只存在当前浏览器。发送前请核对回复是否符合你的真实意思。</li>
       </ul>
       <button id="clearSaved" class="danger-action" type="button">清空本机保存</button>
+      <button id="clearAccessCodePrivacy" class="danger-action" type="button">清除本机访问码</button>
     </section>
 
     <aside class="install-tip" id="installTip" hidden>
@@ -166,6 +188,7 @@
       <button id="showInstall" type="button">如何添加到主屏幕</button>
     </footer>
 
-    <script src="./app.js" defer></script>
+    <script src="./config.js?v=7" defer></script>
+    <script src="./app.js?v=7" defer></script>
   </body>
 </html>
