@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#0b1726" />
+    <meta name="theme-color" content="#091720" />
     <meta name="description" content="可添加到手机主屏幕的回复助手，支持 DeepSeek 联机生成与离线应急。" />
     <meta name="referrer" content="no-referrer" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://api.deepseek.com; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'" />
@@ -12,12 +12,11 @@
     <meta name="apple-mobile-web-app-title" content="狗头军师" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./icon.svg" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%230b1726'/%3E%3Cpath d='M18 19h28v20H32l-9 8v-8h-5z' fill='%237f9cff'/%3E%3Ccircle cx='26' cy='29' r='2.3' fill='white'/%3E%3Ccircle cx='38' cy='29' r='2.3' fill='white'/%3E%3C/svg%3E" />
-    <link rel="stylesheet" href="./styles.css?v=9" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%23091720'/%3E%3Cpath d='M18 19h28v20H32l-9 8v-8h-5z' fill='%239ce5d8'/%3E%3Ccircle cx='26' cy='29' r='2.3' fill='white'/%3E%3Ccircle cx='38' cy='29' r='2.3' fill='white'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="./styles.css?v=10" />
     <title>狗头军师 · 私人版</title>
   </head>
   <body>
-    <div class="ambient" aria-hidden="true"></div>
     <header class="topbar">
       <a class="brand" href="#compose" aria-label="返回回复编辑区">
         <span class="brand-mark" aria-hidden="true">
@@ -25,85 +24,97 @@
         </span>
         <span><strong>狗头军师</strong><small id="brandSubtitle">私人回复助手</small></span>
       </a>
-      <button class="privacy-pill" id="privacyButton" type="button" aria-expanded="false" aria-controls="privacyPanel">
-        <span aria-hidden="true">●</span> 隐私说明
-      </button>
+      <button class="privacy-pill" id="privacyButton" type="button" aria-expanded="false" aria-controls="privacyPanel">隐私</button>
     </header>
 
     <main id="compose" class="workspace">
       <section class="composer" aria-labelledby="composerTitle">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">现在要回什么</p>
-            <h1 id="composerTitle">把原话放进来</h1>
-          </div>
-          <span class="step-mark" aria-label="第一步">01</span>
-        </div>
+        <div class="section-heading"><h1 id="composerTitle">帮我回这句</h1></div>
         <p class="connection-banner" id="connectionBanner" hidden></p>
 
-        <label class="field-label" for="incoming">对方说</label>
-        <textarea id="incoming" rows="5" maxlength="500" placeholder="例如：最近有点忙，等过段时间再说吧"></textarea>
+        <label class="field-label" for="incoming">对方原话</label>
+        <textarea id="incoming" rows="3" maxlength="500" placeholder="粘贴对方说的话，例如：最近有点忙，等过段时间再说吧"></textarea>
         <div class="field-meta"><span id="processingNote">离线模式只在本机处理</span><span id="charCount">0 / 500</span></div>
 
-        <div class="field-grid">
-          <label>
-            <span class="field-label">你们的关系</span>
-            <select id="relation">
-              <option value="刚认识">刚认识</option>
-              <option value="暧昧中" selected>暧昧中</option>
-              <option value="恋爱中">恋爱中</option>
-              <option value="闹矛盾">闹矛盾</option>
-              <option value="分开后">分开后</option>
-            </select>
-          </label>
-          <label>
-            <span class="field-label">这次想要</span>
-            <select id="goal">
-              <option value="推进">自然推进</option>
-              <option value="理解">先理解对方</option>
-              <option value="修复">修复关系</option>
-              <option value="确认">确认态度</option>
-              <option value="退出">体面退出</option>
-            </select>
-          </label>
-        </div>
-
-        <label class="field-label" for="context">补一点背景和你的感受 <span>可选</span></label>
-        <textarea id="context" rows="3" maxlength="300" placeholder="例如：上周约过一次，对方没给具体时间；我有点失落，平时说话比较简短"></textarea>
+        <label class="field-label" for="scene">这是什么场景</label>
+        <select id="scene">
+          <option value="日常接话" selected>日常接话</option>
+          <option value="对方倾诉">对方在倾诉</option>
+          <option value="轻松调侃">轻松调侃</option>
+          <option value="主动邀约">主动邀约</option>
+          <option value="对方说忙">对方说忙／推迟</option>
+          <option value="回应冷淡">回应冷淡</option>
+          <option value="临时取消">临时取消约定</option>
+          <option value="冲突修复">冲突后修复</option>
+          <option value="确认关系">确认关系期待</option>
+          <option value="体面退出">体面退出</option>
+        </select>
 
         <fieldset class="tone-field">
-          <legend class="field-label">回复分寸</legend>
+          <legend class="field-label">想要的语气</legend>
           <div class="tone-options">
-            <label><input type="radio" name="tone" value="稳妥" checked /><span>稳妥</span></label>
+            <label><input type="radio" name="tone" value="稳妥" checked /><span>自然</span></label>
+            <label><input type="radio" name="tone" value="共情" /><span>温柔</span></label>
+            <label><input type="radio" name="tone" value="幽默" /><span>幽默</span></label>
             <label><input type="radio" name="tone" value="会撩" /><span>会撩</span></label>
+            <label><input type="radio" name="tone" value="直接" /><span>直接</span></label>
             <label><input type="radio" name="tone" value="有边界" /><span>有边界</span></label>
           </div>
         </fieldset>
 
+        <details class="fine-tune" id="fineTune">
+          <summary>关系和背景 <span id="fineTuneSummary">不确定 · 先理解对方</span></summary>
+          <div class="field-grid">
+            <label>
+              <span class="field-label">你们的关系</span>
+              <select id="relation">
+                <option value="不确定" selected>还不确定</option>
+                <option value="刚认识">刚认识</option>
+                <option value="暧昧中">暧昧中</option>
+                <option value="恋爱中">恋爱中</option>
+                <option value="闹矛盾">闹矛盾</option>
+                <option value="分开后">分开后</option>
+              </select>
+            </label>
+            <label>
+              <span class="field-label">这次想要</span>
+              <select id="goal">
+                <option value="理解" selected>先理解对方</option>
+                <option value="推进">自然推进</option>
+                <option value="修复">修复关系</option>
+                <option value="确认">确认态度</option>
+                <option value="退出">体面退出</option>
+              </select>
+            </label>
+          </div>
+          <label class="field-label" for="context">更多背景和你的感受 <span>可选</span></label>
+          <textarea id="context" rows="3" maxlength="300" placeholder="例如：认识三个月，约过一次；我有点失落，平时说话比较简短"></textarea>
+        </details>
+
         <fieldset class="tone-field provider-field">
-          <legend class="field-label">使用哪个军师</legend>
+          <legend class="field-label">生成方式</legend>
           <div class="tone-options provider-options">
             <label><input type="radio" name="provider" value="deepseek" checked /><span>DeepSeek 联机</span></label>
             <label><input type="radio" name="provider" value="offline" /><span>离线应急</span></label>
           </div>
-          <p class="model-note" id="modelNote">DeepSeek 会根据你提供的具体对话生成回复。</p>
+          <p class="model-note" id="modelNote">DeepSeek 按原话生成；离线应急用固定规则。</p>
         </fieldset>
 
-        <div class="access-box" id="accessBox">
-          <label class="field-label" for="accessCode">首次使用：填写 DeepSeek API 密钥</label>
+        <details class="access-box" id="accessBox">
+          <summary id="keySummary">填写 DeepSeek 密钥</summary>
+          <label class="field-label" for="accessCode">API 密钥</label>
           <div class="access-row">
             <input id="accessCode" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="keyNote" placeholder="sk-…（不要发到聊天里）" />
             <button id="clearAccessCode" class="text-action" type="button">清除</button>
           </div>
-          <p class="model-note" id="keyNote">无需登录；首次成功生成后，密钥只保存在这台手机的当前浏览器。联机时密钥和你填的内容会直接发给 DeepSeek。建议使用限额密钥。</p>
-        </div>
+          <p class="model-note" id="keyNote">无需登录。首次成功后密钥保存在本机；联机时内容会直接发给 DeepSeek。建议使用限额密钥。</p>
+        </details>
 
         <button class="primary-action" id="generateButton" type="button">
-          <span id="generateLabel">给我一条能直接发的</span>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
+          <span id="generateLabel">生成一条回复</span>
         </button>
         <p class="request-status" id="requestStatus" role="status" aria-live="polite"></p>
-        <p class="safety-note">明确拒绝、不适或危险信号出现时，军师会优先建议停止推进。</p>
+        <p class="safety-note">明显拒绝或不适时，先尊重边界。</p>
       </section>
 
       <section class="answer-panel" aria-labelledby="answerTitle" aria-live="polite">
@@ -126,32 +137,24 @@
           </div>
         </div>
 
-        <section class="decision-card" id="decisionCard" aria-label="军师判断" hidden>
-          <p class="decision-heading"><span id="strategyText"></span><span>为什么这样回</span></p>
-          <p id="reasonText"></p>
-          <p class="decision-timing" id="sendWhenText"></p>
-        </section>
+        <p class="next-inline" id="nextInline" hidden><span>下一步</span><span id="nextText">发出后观察对方是否给出具体回应。</span></p>
 
-        <div class="signal-rail" aria-label="回复判断依据">
-          <article>
-            <span class="rail-dot fact" aria-hidden="true"></span>
-            <p class="rail-label">看到的事实</p>
-            <p id="factText">目前还没有对方的原话。</p>
-          </article>
-          <article>
-            <span class="rail-dot maybe" aria-hidden="true"></span>
-            <p class="rail-label">暂不脑补</p>
-            <p id="unknownText">不凭一句话猜测对方内心。</p>
-          </article>
-          <article>
-            <span class="rail-dot next" aria-hidden="true"></span>
-            <p class="rail-label">下一步</p>
-            <p id="nextText">发出后观察对方是否给出具体、可兑现的回应。</p>
-          </article>
-        </div>
+        <details class="insight-details" id="insightDetails" hidden>
+          <summary>军师判断 <span id="strategyText"></span></summary>
+          <section class="decision-card" id="decisionCard" aria-label="军师判断" hidden>
+            <p class="decision-heading">为什么这样回</p>
+            <p id="reasonText"></p>
+            <p class="decision-timing" id="sendWhenText"></p>
+          </section>
+          <div class="signal-rail" aria-label="回复判断依据">
+            <article><span class="rail-dot fact" aria-hidden="true"></span><p class="rail-label">看到的事实</p><p id="factText">目前还没有对方的原话。</p></article>
+            <article><span class="rail-dot maybe" aria-hidden="true"></span><p class="rail-label">暂不脑补</p><p id="unknownText">不凭一句话猜测对方内心。</p></article>
+          </div>
+        </details>
 
-        <section class="followup-panel" id="followupPanel" aria-labelledby="followupTitle" hidden>
-          <h3 id="followupTitle">发出后怎么看</h3>
+        <details class="insight-details" id="followupDetails" hidden>
+          <summary>后续怎么走</summary>
+          <section class="followup-panel" id="followupPanel" aria-label="后续分支" hidden>
           <dl>
             <div><dt>积极回应</dt><dd id="positiveText"></dd></div>
             <div><dt>回应含糊</dt><dd id="vagueText"></dd></div>
@@ -159,13 +162,14 @@
           </dl>
           <p class="followup-stop" id="stopWhenText"></p>
           <p class="followup-question" id="questionText" hidden></p>
-        </section>
+          </section>
+        </details>
 
-        <div class="alternate" id="alternateBox" hidden>
-          <p class="field-label">另一个版本</p>
+        <details class="alternate insight-details" id="alternateBox" hidden>
+          <summary>换个说法</summary>
           <p id="alternateText"></p>
           <button id="useAlternate" class="text-action" type="button">换成这一条</button>
-        </div>
+        </details>
 
         <div class="saved-panel" id="savedPanel" hidden>
           <div class="saved-heading">
@@ -184,7 +188,7 @@
       </div>
       <ul>
         <li>离线应急模式只用本机规则，不发送原话。</li>
-        <li>选 DeepSeek 时，原话、关系、目标、语气和补充背景会从手机直接发送给 DeepSeek；请先隐去姓名、电话等敏感信息。</li>
+        <li>选 DeepSeek 时，原话、场景、关系、目标、语气和补充背景会从手机直接发送给 DeepSeek；请先隐去姓名、电话等敏感信息。</li>
         <li>网页无需登录。API 密钥首次成功使用后保存在当前浏览器，不会写进 GitHub；拿到手机的人、恶意扩展或被篡改的网页代码可能读取它。请用专用、低额度密钥。</li>
         <li>输入不会自动保存；你主动保存的草稿只存在当前浏览器。发送前请核对回复是否符合你的真实意思。</li>
       </ul>
@@ -206,7 +210,7 @@
       <button id="showInstall" type="button">如何添加到主屏幕</button>
     </footer>
 
-    <script src="./config.js?v=9" defer></script>
-    <script src="./app.js?v=9" defer></script>
+    <script src="./config.js?v=10" defer></script>
+    <script src="./app.js?v=10" defer></script>
   </body>
 </html>
