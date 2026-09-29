@@ -1,7 +1,7 @@
 {
   "name": "狗头军师 · 私人版",
   "short_name": "狗头军师",
-  "description": "不上传聊天内容的私人高情商回复助手",
+  "description": "支持 DeepSeek 联机生成和离线应急的私人回复助手",
   "lang": "zh-CN",
   "start_url": "./",
   "scope": "./",

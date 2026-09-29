@@ -179,8 +179,9 @@ textarea:focus, input:focus, select:focus { border-color: rgba(127, 156, 255, 0.
 .tone-options input:checked + span { color: white; border-color: var(--blue); background: rgba(127, 156, 255, 0.17); box-shadow: inset 0 0 0 1px rgba(127, 156, 255, 0.18); }
 .tone-options input:focus-visible + span { outline: 3px solid rgba(125, 226, 236, 0.72); outline-offset: 3px; }
 .provider-field { margin-top: 4px; }
+.provider-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .provider-options span { min-height: 52px; font-weight: 700; }
-.model-note { margin: 7px 2px 0; color: var(--muted); font-size: .78rem; line-height: 1.5; }
+.model-note { margin: 7px 2px 0; color: var(--muted); font-size: .875rem; line-height: 1.55; }
 .access-box { margin-top: 10px; padding: 0 14px 14px; border: 1px solid var(--line); border-radius: 14px; background: rgba(4, 12, 21, .32); }
 .access-box .field-label { margin-top: 12px; }
 .access-row { display: flex; align-items: center; gap: 10px; }
@@ -207,7 +208,7 @@ textarea:focus, input:focus, select:focus { border-color: rgba(127, 156, 255, 0.
 .primary-action:active { transform: translateY(0); }
 .primary-action:disabled { opacity: .62; cursor: wait; transform: none; }
 .primary-action svg { width: 23px; fill: none; stroke: currentColor; stroke-width: 2; }
-.request-status { min-height: 1.2em; margin: 10px 3px 0; color: var(--cyan); font-size: .82rem; }
+.request-status { min-height: 1.2em; margin: 10px 3px 0; color: var(--cyan); font-size: .875rem; }
 .request-status.is-error { color: var(--danger); }
 .safety-note { margin: 12px 4px 0; color: #75879d; font-size: 0.78rem; }
 

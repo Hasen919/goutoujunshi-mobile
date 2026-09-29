@@ -1,5 +1,5 @@
-// 只填写公开的接口网址。API 密钥和私人访问码绝不能放进这个文件。
+// 只放公开的 DeepSeek 接口网址。API 密钥必须由用户在自己的手机填写，绝不能放进本文件。
 window.GOUTOUJUNSHI_CONFIG = {
-  apiUrl: "",
-  availableProviders: [],
+  apiUrl: "https://api.deepseek.com/chat/completions",
+  availableProviders: ["deepseek"],
 };

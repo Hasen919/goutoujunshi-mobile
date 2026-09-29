@@ -1,5 +1,5 @@
-const CACHE = "goutoujunshi-private-v7";
-const ASSETS = ["./", "./index.html", "./styles.css?v=7", "./config.js?v=7", "./app.js?v=7", "./manifest.webmanifest", "./icon.svg"];
+const CACHE = "goutoujunshi-private-v8";
+const ASSETS = ["./", "./index.html", "./styles.css?v=8", "./config.js?v=8", "./app.js?v=8", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS)));
@@ -17,6 +17,13 @@ self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
+  if (event.request.mode === "navigate") {
+    event.respondWith(fetch(event.request, { cache: "no-store" }).then((response) => {
+      if (response.ok) caches.open(CACHE).then((cache) => cache.put(event.request, response.clone()));
+      return response;
+    }).catch(() => caches.match(event.request).then((cached) => cached || caches.match("./index.html"))));
+    return;
+  }
   if (url.pathname.endsWith("/config.js")) {
     event.respondWith(fetch(event.request, { cache: "no-store" }).then((response) => {
       if (response.ok) caches.open(CACHE).then((cache) => cache.put(event.request, response.clone()));

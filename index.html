@@ -4,14 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#0b1726" />
-    <meta name="description" content="可添加到手机主屏幕的私人回复助手，支持离线应急与 AI 模型切换。" />
+    <meta name="description" content="可添加到手机主屏幕的回复助手，支持 DeepSeek 联机生成与离线应急。" />
+    <meta name="referrer" content="no-referrer" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://api.deepseek.com; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="狗头军师" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./icon.svg" />
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%230b1726'/%3E%3Cpath d='M18 19h28v20H32l-9 8v-8h-5z' fill='%237f9cff'/%3E%3Ccircle cx='26' cy='29' r='2.3' fill='white'/%3E%3Ccircle cx='38' cy='29' r='2.3' fill='white'/%3E%3C/svg%3E" />
-    <link rel="stylesheet" href="./styles.css?v=7" />
+    <link rel="stylesheet" href="./styles.css?v=8" />
     <title>狗头军师 · 私人版</title>
   </head>
   <body>
@@ -37,7 +39,7 @@
           </div>
           <span class="step-mark" aria-label="第一步">01</span>
         </div>
-        <p class="connection-banner" id="connectionBanner">离线应急可用；AI 联机正在接入。这里不要填写 API 密钥。</p>
+        <p class="connection-banner" id="connectionBanner" hidden></p>
 
         <label class="field-label" for="incoming">对方说</label>
         <textarea id="incoming" rows="5" maxlength="500" placeholder="例如：最近有点忙，等过段时间再说吧"></textarea>
@@ -81,20 +83,19 @@
         <fieldset class="tone-field provider-field">
           <legend class="field-label">使用哪个军师</legend>
           <div class="tone-options provider-options">
-            <label><input type="radio" name="provider" value="deepseek" /><span>DeepSeek</span></label>
-            <label><input type="radio" name="provider" value="openai" /><span>ChatGPT</span></label>
-            <label><input type="radio" name="provider" value="offline" checked /><span>离线应急</span></label>
+            <label><input type="radio" name="provider" value="deepseek" checked /><span>DeepSeek 联机</span></label>
+            <label><input type="radio" name="provider" value="offline" /><span>离线应急</span></label>
           </div>
-          <p class="model-note" id="modelNote">离线建议不调用 AI，适合没网络时应急。</p>
+          <p class="model-note" id="modelNote">DeepSeek 会根据你提供的具体对话生成回复。</p>
         </fieldset>
 
-        <div class="access-box" id="accessBox" hidden>
-          <label class="field-label" for="accessCode">首次使用联机模式：填写私人访问码</label>
+        <div class="access-box" id="accessBox">
+          <label class="field-label" for="accessCode">首次使用：填写 DeepSeek API 密钥</label>
           <div class="access-row">
-            <input id="accessCode" type="password" autocomplete="off" spellcheck="false" placeholder="访问码只保存在本机，不是 API 密钥" />
+            <input id="accessCode" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="keyNote" placeholder="sk-…（不要发到聊天里）" />
             <button id="clearAccessCode" class="text-action" type="button">清除</button>
           </div>
-          <p class="model-note">无需登录账号。发送联机请求时，原话和背景会传给所选 AI 服务处理。</p>
+          <p class="model-note" id="keyNote">无需登录；首次成功生成后，密钥只保存在这台手机的当前浏览器。联机时密钥和你填的内容会直接发给 DeepSeek。建议使用限额密钥。</p>
         </div>
 
         <button class="primary-action" id="generateButton" type="button">
@@ -166,12 +167,12 @@
       </div>
       <ul>
         <li>离线应急模式只用本机规则，不发送原话。</li>
-        <li>选 DeepSeek 或 ChatGPT 时，原话、关系、目标、语气和补充背景会经私人接口发送给所选 AI 服务；请先隐去姓名、电话等敏感信息。</li>
-        <li>网页无需登录。私人访问码保存在当前浏览器，供联机请求使用；API 密钥只应放在服务端。</li>
+        <li>选 DeepSeek 时，原话、关系、目标、语气和补充背景会从手机直接发送给 DeepSeek；请先隐去姓名、电话等敏感信息。</li>
+        <li>网页无需登录。API 密钥首次成功使用后保存在当前浏览器，不会写进 GitHub；拿到手机的人、恶意扩展或被篡改的网页代码可能读取它。请用专用、低额度密钥。</li>
         <li>输入不会自动保存；你主动保存的草稿只存在当前浏览器。发送前请核对回复是否符合你的真实意思。</li>
       </ul>
       <button id="clearSaved" class="danger-action" type="button">清空本机保存</button>
-      <button id="clearAccessCodePrivacy" class="danger-action" type="button">清除本机访问码</button>
+      <button id="clearAccessCodePrivacy" class="danger-action" type="button">清除本机 API 密钥</button>
     </section>
 
     <aside class="install-tip" id="installTip" hidden>
@@ -188,7 +189,7 @@
       <button id="showInstall" type="button">如何添加到主屏幕</button>
     </footer>
 
-    <script src="./config.js?v=7" defer></script>
-    <script src="./app.js?v=7" defer></script>
+    <script src="./config.js?v=8" defer></script>
+    <script src="./app.js?v=8" defer></script>
   </body>
 </html>
