@@ -13,7 +13,7 @@
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./icon.svg" />
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%230b1726'/%3E%3Cpath d='M18 19h28v20H32l-9 8v-8h-5z' fill='%237f9cff'/%3E%3Ccircle cx='26' cy='29' r='2.3' fill='white'/%3E%3Ccircle cx='38' cy='29' r='2.3' fill='white'/%3E%3C/svg%3E" />
-    <link rel="stylesheet" href="./styles.css?v=8" />
+    <link rel="stylesheet" href="./styles.css?v=9" />
     <title>狗头军师 · 私人版</title>
   </head>
   <body>
@@ -68,8 +68,8 @@
           </label>
         </div>
 
-        <label class="field-label" for="context">补一句背景 <span>可选</span></label>
-        <input id="context" maxlength="180" placeholder="例如：上周约过一次，她没有给具体时间" />
+        <label class="field-label" for="context">补一点背景和你的感受 <span>可选</span></label>
+        <textarea id="context" rows="3" maxlength="300" placeholder="例如：上周约过一次，对方没给具体时间；我有点失落，平时说话比较简短"></textarea>
 
         <fieldset class="tone-field">
           <legend class="field-label">回复分寸</legend>
@@ -110,7 +110,7 @@
         <div class="answer-topline">
           <div>
             <p class="eyebrow" id="answerSource">首选回复 · 离线建议</p>
-            <h2 id="answerTitle">先温柔，再清楚</h2>
+            <h2 id="answerTitle">先发这句</h2>
           </div>
           <span id="signalBadge" class="signal-badge">等待原话</span>
         </div>
@@ -125,6 +125,12 @@
             <button id="saveButton" class="text-action" type="button" disabled>保存到本机</button>
           </div>
         </div>
+
+        <section class="decision-card" id="decisionCard" aria-label="军师判断" hidden>
+          <p class="decision-heading"><span id="strategyText"></span><span>为什么这样回</span></p>
+          <p id="reasonText"></p>
+          <p class="decision-timing" id="sendWhenText"></p>
+        </section>
 
         <div class="signal-rail" aria-label="回复判断依据">
           <article>
@@ -143,6 +149,17 @@
             <p id="nextText">发出后观察对方是否给出具体、可兑现的回应。</p>
           </article>
         </div>
+
+        <section class="followup-panel" id="followupPanel" aria-labelledby="followupTitle" hidden>
+          <h3 id="followupTitle">发出后怎么看</h3>
+          <dl>
+            <div><dt>积极回应</dt><dd id="positiveText"></dd></div>
+            <div><dt>回应含糊</dt><dd id="vagueText"></dd></div>
+            <div><dt>没有回应</dt><dd id="noReplyText"></dd></div>
+          </dl>
+          <p class="followup-stop" id="stopWhenText"></p>
+          <p class="followup-question" id="questionText" hidden></p>
+        </section>
 
         <div class="alternate" id="alternateBox" hidden>
           <p class="field-label">另一个版本</p>
@@ -189,7 +206,7 @@
       <button id="showInstall" type="button">如何添加到主屏幕</button>
     </footer>
 
-    <script src="./config.js?v=8" defer></script>
-    <script src="./app.js?v=8" defer></script>
+    <script src="./config.js?v=9" defer></script>
+    <script src="./app.js?v=9" defer></script>
   </body>
 </html>
